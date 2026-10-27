@@ -14,21 +14,18 @@ Every result below was observed on the emulator through `adb`: UI hierarchy dump
 
 ---
 
-## Changes after teacher review
+## API and data model
 
-- **API source.** The app now fetches events from the API posted on Moodle: `GET https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/events/event`. Before coding, `curl` returned HTTP 200 and a JSON array of 50 objects, each with 8 string fields.
-- **`CampusApi`.** `BASE_URL = "https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/"` and `@GET("events/event") suspend fun getEvents(): List<EventDto>`.
-- **`EventDto`.** Rewritten to mirror the JSON field for field: `id`, `createdAt`, `name`, `avatar`, `startingDate`, `endingDate`, `description`, `address`. All are `String?`. The names match the JSON exactly, so no `@SerializedName` is needed.
-- **`CampusEvent.id`.** Changed from `Int` to `String`, because the API returns `"id": "1"`.
-- **`EventDto.toDomain()`** in `EventsRepository.kt`:
-    - `title` comes from `name`.
-    - `location` comes from `address`, with fallback `"TBA"`.
-    - `startsAt` comes from `startingDate`, formatted by `formatEventDate()`.
+- **Endpoint.** `GET https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/events/event` returns a JSON array of 50 objects, each with 8 string fields.
+- **`CampusApi`.** `BASE_URL = "https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/"` and `@GET("events/event") suspend fun getEvents(): List<EventDto>`, with the Gson converter.
+- **`EventDto`.** Mirrors the JSON field for field: `id`, `createdAt`, `name`, `avatar`, `startingDate`, `endingDate`, `description`, `address`. All are `String?`, and the names match the JSON exactly.
+- **Mapping to `CampusEvent`** (`EventDto.toDomain()` in `EventsRepository.kt`):
+    - `title` = `name`.
+    - `location` = `address`, with fallback `"TBA"`.
+    - `startsAt` = `startingDate` formatted by `formatEventDate()`, or the raw string if parsing fails.
     - `description` is kept.
-    - Items with a blank `id` or `name` are still dropped.
-- **Date parsing.** minSdk is 24, and the project has no core-library desugaring, so `java.time` is not used. `formatEventDate()` parses the ISO-8601 UTC string with `SimpleDateFormat` (pattern `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`, then the same without millis), with `isLenient = false`. It formats as `MMM d, yyyy · HH:mm` in the device time zone. If parsing fails, it returns the raw string, so bad data cannot crash the list.
-- **Old data source removed.** `api/events.json` was deleted from the project folder. `grep -rn "raw.githubusercontent\|events.json" app/src` finds nothing.
-- **Unchanged.** HTTPS, the `INTERNET` permission, the Gson converter, Loading / Content / Empty / Error + Retry, `toUserMessage()`, the `Log.w` in the repository, and the `CancellationException` rethrow.
+    - Items with a blank `id` or `name` are dropped.
+- **Date parsing.** minSdk is 24 and the project has no core-library desugaring, so `java.time` is not used. `formatEventDate()` parses the ISO-8601 UTC string with `SimpleDateFormat` (pattern `yyyy-MM-dd'T'HH:mm:ss.SSS'Z'`, then the same without millis, `isLenient = false`) and formats it as `MMM d, yyyy · HH:mm` in the device time zone.
 
 Real API data on screen (network on, first launch). The first item, `"startingDate":"2026-10-20T12:23:40.729Z"`, is shown as `Oct 20, 2026 · 15:23` in the emulator's UTC+3 time zone:
 
@@ -228,7 +225,6 @@ A success with an empty list becomes `Empty`, not `Error`.
 - `BASE_URL`: `https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/`
 - Endpoint: `@GET("events/event")`
 - `CampusApi.kt` is byte-for-byte identical to the pre-exercise backup. It has no interceptor, no `.invalid` host, and no OkHttp imports.
-- `api/events.json` is deleted. No reference to `raw.githubusercontent.com` remains in `app/src`.
 - Emulator: airplane mode `disabled`, network on, DNS resolving the API host.
 - Final state: the installed build shows **Content** with real API data.
 
