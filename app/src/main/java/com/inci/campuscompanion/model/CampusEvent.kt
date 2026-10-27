@@ -1,7 +1,7 @@
 package com.inci.campuscompanion.model
 
 data class CampusEvent(
-    val id: Int,
+    val id: String,
     val title: String,
     val location: String,
     val startsAt: String,

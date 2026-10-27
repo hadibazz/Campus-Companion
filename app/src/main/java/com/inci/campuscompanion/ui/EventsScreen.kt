@@ -58,12 +58,9 @@ fun EventsScreen(
             when (uiState) {
                 EventsUiState.Loading -> CircularProgressIndicator()
                 is EventsUiState.Error -> EventsError(message = uiState.message, onRetry = onRefresh)
-                is EventsUiState.Content ->
-                    if (uiState.events.isEmpty()) {
-                        Text(text = "No upcoming events.", style = MaterialTheme.typography.bodyLarge)
-                    } else {
-                        EventList(events = uiState.events)
-                    }
+                EventsUiState.Empty ->
+                    Text(text = "No upcoming events.", style = MaterialTheme.typography.bodyLarge)
+                is EventsUiState.Content -> EventList(events = uiState.events)
             }
         }
     }
@@ -144,8 +141,8 @@ fun EventsContentPreview() {
         EventsScreen(
             uiState = EventsUiState.Content(
                 listOf(
-                    CampusEvent(1, "Welcome Week Fair", "Main Quad", "2026-10-22 10:00", "Meet clubs."),
-                    CampusEvent(2, "Android Workshop", "Lab 3", "2026-10-23 14:00", "")
+                    CampusEvent("1", "Welcome Week Fair", "Main Quad", "Oct 22, 2026 · 10:00", "Meet clubs."),
+                    CampusEvent("2", "Android Workshop", "Lab 3", "Oct 23, 2026 · 14:00", "")
                 )
             ),
             onRefresh = {}

@@ -1,11 +1,13 @@
 package com.inci.campuscompanion.data.remote
 
-import com.google.gson.annotations.SerializedName
-
+// Mirrors one object of GET events/event field for field; nullable so bad data can't crash Gson mapping.
 data class EventDto(
-    @SerializedName("id") val id: Int?,
-    @SerializedName("title") val title: String?,
-    @SerializedName("location") val location: String?,
-    @SerializedName("starts_at") val startsAt: String?,
-    @SerializedName("description") val description: String?
+    val id: String?,
+    val createdAt: String?,
+    val name: String?,
+    val avatar: String?,
+    val startingDate: String?,
+    val endingDate: String?,
+    val description: String?,
+    val address: String?
 )

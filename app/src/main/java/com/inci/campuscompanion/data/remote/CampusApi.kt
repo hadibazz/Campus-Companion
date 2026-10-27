@@ -5,12 +5,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
 
 interface CampusApi {
-    @GET("events.json")
+    @GET("events/event")
     suspend fun getEvents(): List<EventDto>
 
     companion object {
-        private const val BASE_URL =
-            "https://raw.githubusercontent.com/toufic-fy/Campus-Companion/master/api/"
+        private const val BASE_URL = "https://6ad70838f71f154ac4879fac.mockapi.io/api/v1/"
 
         fun create(): CampusApi = Retrofit.Builder()
             .baseUrl(BASE_URL)
